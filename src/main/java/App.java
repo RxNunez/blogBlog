@@ -13,6 +13,21 @@ public class App {
 
         staticFileLocation("/public");
 
+        get("/posts/new", (req, res) -> {
+            Map<String, Object> model = new HashMap<>();
+            return new ModelAndView(model, "newpost-form.hbs");
+        }, new HandlebarsTemplateEngine());
+
+        post("/posts/new", (request, response) ->{
+            Map<String, Object> model = new HashMap<String, Object>();
+
+            String content = request.queryParams("content");
+            Post newPost = new Post(content);
+            model.put("post", newPost);
+            return new ModelAndView(model, "success.hbs");
+
+        }, new HandlebarsTemplateEngine());
+
         get("/", (request, response) ->{
             Map<String, Object> model = new HashMap<String, Object>();
             ArrayList<Post> posts = Post.getAll();
@@ -22,13 +37,14 @@ public class App {
             return new ModelAndView(model, "index.hbs");
         }, new HandlebarsTemplateEngine());
 
-
-        post("/posts/new", (request, response) ->{
-            Map<String, Object> model = new HashMap<String, Object>();
-            String content = request.queryParams("content");
-            Post newPost = new Post(content);
-            return new ModelAndView(model, "success.hbs");
-
+        get("/posts/:id", (req, res) -> {
+            Map<String, Object> model = new HashMap<>();
+            int idOfPostToFind = Integer.parseInt(req.params("id")); //pull id - must match route segment
+            Post foundPost = Post.findById(idOfPostToFind); //use it to find post
+            model.put("post", foundPost); //add it to model for template to display
+            return new ModelAndView(model, "post-detail.hbs"); //individual post page.
         }, new HandlebarsTemplateEngine());
+
+
     }
 }
